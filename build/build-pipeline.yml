@@ -1,0 +1,52 @@
+trigger: 
+ - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Prepare
+  jobs:
+  - job: "Prepare_build_environment"
+    steps:
+    - task: GoTool@0
+      displayName: Golang - set up the build environment
+      inputs:
+        version: '1.20'
+
+- stage: BuildAndTest
+  dependsOn:
+  - Prepare
+  jobs:
+  - job: "Build_and_test_the_activities_per_category"
+    strategy:
+      matrix:
+        identification-jwt:
+          category: "identification"
+          activity: "jwt"
+    steps:
+    - task: Go@0
+      displayName: Golang - get dependencies
+      inputs:
+        command: 'get'
+        arguments: '-d'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/$(category)/activity/$(activity)'
+    - task: Go@0
+      displayName: Golang - build
+      inputs:
+        command: 'build'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/$(category)/activity/$(activity)'
+    - script: id -u `whoami`
+      displayName: Debug shite!
+    - task: Go@0
+      displayName: Golang - test
+      inputs:
+        command: 'test'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/src/$(category)/activity/$(activity)'
+
+- stage: TearDown
+  jobs:
+  - job: "Clean_up"
+    steps:
+    - script: echo "stop"
+      displayName: Docker - stop test dependencies (sFTP mock container)

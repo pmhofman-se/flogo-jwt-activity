@@ -1,0 +1,137 @@
+{
+    "name": "jwt",
+    "type": "flogo:activity",
+    "version": "0.0.1",
+    "title": "Identification JWT",
+    "description": "Identification JWT",
+    "homepage": "https://github.com/pmhofman-se/flogo-jwt-activity/identification/activity/jwt",
+    "author": "Peter Hofman",
+    "ref": "github.com/flogo-components/identification/activity/jwt",
+    "display": {
+      "category": "identification",
+      "visible": true,
+      "smallIcon": "jwt.png",
+      "description": "Identification JWT"
+    },
+    "settings": [
+      {
+        "name": "SigningMethod",
+        "type": "string",
+        "required": true,
+        "display": {
+          "name": "SigningMethod",
+          "description": "Signing method"
+        },
+        "allowed": ["ES256", "ES384", "ES512", "EdDSA", "HS256", "HS384", "HS512", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512"],
+        "value": "RS256"
+      },
+      {
+        "name": "Mode",
+        "type": "string",
+        "required": true,
+        "display": {
+          "name": "Mode",
+          "description": "Operation mode"
+        },
+        "allowed": ["Sign","Verify"],
+        "value": "Sign"
+      }
+    ],
+    "inputs":[
+      {
+        "name": "AdditionalHeaderNames",
+        "type": "array",
+        "required": false,
+        "display":{
+          "name": "Additional Header Names",
+          "description": "Set additional header names",
+          "type": "table",
+          "schema": "{\r\n    \"$schema\": \"http:\/\/json-schema.org\/draft-04\/schema#\",\r\n    \"definitions\": {},\r\n    \"id\": \"http:\/\/example.com\/example.json\",\r\n    \"items\": {\r\n        \"id\": \"\/items\",\r\n        \"properties\": {\r\n            \"Name\": {\r\n                \"id\": \"\/items\/properties\/Name\",\r\n                \"type\": \"string\"\r\n            },\r\n            \"Type\": {\r\n                \"id\": \"\/items\/properties\/Type\",\r\n                \"type\": {\"enum\":[\"String\"]}\r\n            }\r\n        },\r\n        \"type\": \"object\"\r\n    },\r\n    \"type\": \"array\"\r\n}",
+          "inputSettingsOnly": true
+        }
+      },
+      {
+        "name": "AdditionalHeaders",
+        "type": "object",
+        "required": false
+      },
+      {
+        "name": "PayloadFieldNames",
+        "type": "array",
+        "required": true,
+        "display":{
+          "name": "Payload Field Names",
+          "description": "Set payload field names",
+          "type": "table",
+          "schema": "{\r\n    \"$schema\": \"http:\/\/json-schema.org\/draft-04\/schema#\",\r\n    \"definitions\": {},\r\n    \"id\": \"http:\/\/example.com\/example.json\",\r\n    \"items\": {\r\n        \"id\": \"\/items\",\r\n        \"properties\": {\r\n            \"Name\": {\r\n                \"id\": \"\/items\/properties\/Name\",\r\n                \"type\": \"string\"\r\n            },\r\n            \"Type\": {\r\n                \"id\": \"\/items\/properties\/Type\",\r\n                \"type\": {\"enum\":[\"String\", \"Number\", \"Object\", \"Array\"]}\r\n            }\r\n        },\r\n        \"type\": \"object\"\r\n    },\r\n    \"type\": \"array\"\r\n}",
+          "inputSettingsOnly": true
+        }
+      },
+      {
+        "name": "Payload",
+        "type": "object",
+        "required": false
+      },
+      {
+        "name": "Secret",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "PrivateKey",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "PublicKey",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "VerifyJWTToken",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "outputs": [
+      {
+        "name": "JWTToken",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "OutputHeaderNames",
+        "type": "array",
+        "required": false,
+        "display":{
+          "name": "Header Names",
+          "description": "Set header names",
+          "type": "table",
+          "schema": "{\r\n    \"$schema\": \"http:\/\/json-schema.org\/draft-04\/schema#\",\r\n    \"definitions\": {},\r\n    \"id\": \"http:\/\/example.com\/example.json\",\r\n    \"items\": {\r\n        \"id\": \"\/items\",\r\n        \"properties\": {\r\n            \"Name\": {\r\n                \"id\": \"\/items\/properties\/Name\",\r\n                \"type\": \"string\"\r\n            },\r\n            \"Type\": {\r\n                \"id\": \"\/items\/properties\/Type\",\r\n                \"type\": {\"enum\":[\"String\"]}\r\n            }\r\n        },\r\n        \"type\": \"object\"\r\n    },\r\n    \"type\": \"array\"\r\n}",
+          "outputSettingsOnly": true
+        }
+      },
+      {
+        "name": "OutputHeaders",
+        "type": "object",
+        "required": false
+      },
+      {
+        "name": "OutputPayloadFieldNames",
+        "type": "array",
+        "required": false,
+        "display":{
+          "name": "Payload Field Names",
+          "description": "Set payload field names",
+          "type": "table",
+          "schema": "{\r\n    \"$schema\": \"http:\/\/json-schema.org\/draft-04\/schema#\",\r\n    \"definitions\": {},\r\n    \"id\": \"http:\/\/example.com\/example.json\",\r\n    \"items\": {\r\n        \"id\": \"\/items\",\r\n        \"properties\": {\r\n            \"Name\": {\r\n                \"id\": \"\/items\/properties\/Name\",\r\n                \"type\": \"string\"\r\n            },\r\n            \"Type\": {\r\n                \"id\": \"\/items\/properties\/Type\",\r\n                \"type\": {\"enum\":[\"String\", \"Number\", \"Object\", \"Array\"]}\r\n            }\r\n        },\r\n        \"type\": \"object\"\r\n    },\r\n    \"type\": \"array\"\r\n}",
+          "outputSettingsOnly": true
+        }
+      },
+      {
+        "name": "OutputPayload",
+        "type": "object",
+        "required": false
+      }
+    ]
+  }

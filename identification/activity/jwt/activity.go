@@ -16,7 +16,7 @@ func init() {
 	_ = activity.Register(&JWTActivity{}, New)
 }
 
-var activityLog = log.ChildLogger(log.RootLogger(), "jwt-activity-jwtsign")
+var activityLog = log.ChildLogger(log.RootLogger(), ACTIVITY_LOGGER)
 
 var activityMd = activity.ToMetadata(&Settings{}, &Input{}, &Output{})
 
@@ -42,9 +42,9 @@ func (a *JWTActivity) Eval(context activity.Context) (done bool, err error) {
 	settingsMode := a.settings.Mode
 
 	switch settingsMode {
-	case "Sign":
+	case MODE_SIGN:
 		done, err = Sign(settingsSigningMethod, context)
-	case "Verify":
+	case MODE_VERIFY:
 		done, err = Verify(settingsSigningMethod, context)
 	}
 	return done, err
@@ -174,17 +174,17 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 
 	var signKey interface{}
 	switch settingsSigningMethod {
-	case "ES256", "ES384", "ES512":
+	case SIGNING_METHOD_ES256, SIGNING_METHOD_ES384, SIGNING_METHOD_ES512:
 		signKey, err = jwt.ParseECPrivateKeyFromPEM(decodedPrivateKey)
-	case "EdDSA":
+	case SIGNING_METHOD_EdDSA:
 		signKey, err = jwt.ParseEdPrivateKeyFromPEM(decodedPrivateKey)
-	case "HS256", "HS384", "HS512":
+	case SIGNING_METHOD_HS256, SIGNING_METHOD_HS384, SIGNING_METHOD_HS512:
 		signKey, err = []byte(inputSecret), nil
-	case "PS256", "PS384", "PS512":
+	case SIGNING_METHOD_PS256, SIGNING_METHOD_PS384, SIGNING_METHOD_PS512:
 		signKey, err = jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
-	case "RS256", "RS384", "RS512":
+	case SIGNING_METHOD_RS256, SIGNING_METHOD_RS384, SIGNING_METHOD_RS512:
 		signKey, err = jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
-	case "none":
+	case SIGNING_METHOD_NONE:
 		signKey, err = nil, nil
 		activityLog.Debugf("We don't support signing method: %v. Neither does the Go jwt package!", settingsSigningMethod)
 	default:
@@ -229,28 +229,28 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 
 	var decodedPublicKey []byte
 	switch settingsSigningMethod {
-	case "ES256", "ES384", "ES512", "EdDSA", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
+	case SIGNING_METHOD_ES256, SIGNING_METHOD_ES384, SIGNING_METHOD_ES512, SIGNING_METHOD_EdDSA, SIGNING_METHOD_PS256, SIGNING_METHOD_PS384, SIGNING_METHOD_PS512, SIGNING_METHOD_RS256, SIGNING_METHOD_RS384, SIGNING_METHOD_RS512:
 		decodedPublicKey, err = base64.StdEncoding.DecodeString(inputPublicKey)
 		if err != nil {
 			activityLog.Errorf("error decoding %v public key input: %v", inputPublicKey, err)
 			return false, err
 		}
-	case "HS256", "HS384", "HS512", "none":
+	case SIGNING_METHOD_HS256, SIGNING_METHOD_HS384, SIGNING_METHOD_HS512, SIGNING_METHOD_NONE:
 		fallthrough
 	default:
 	}
 
 	var verifyKey interface{}
 	switch settingsSigningMethod {
-	case "ES256", "ES384", "ES512":
+	case SIGNING_METHOD_ES256, SIGNING_METHOD_ES384, SIGNING_METHOD_ES512:
 		verifyKey, err = jwt.ParseECPublicKeyFromPEM(decodedPublicKey)
-	case "EdDSA":
+	case SIGNING_METHOD_EdDSA:
 		verifyKey, err = jwt.ParseEdPublicKeyFromPEM(decodedPublicKey)
-	case "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
+	case SIGNING_METHOD_PS256, SIGNING_METHOD_PS384, SIGNING_METHOD_PS512, SIGNING_METHOD_RS256, SIGNING_METHOD_RS384, SIGNING_METHOD_RS512:
 		verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
-	case "HS256", "HS384", "HS512":
+	case SIGNING_METHOD_HS256, SIGNING_METHOD_HS384, SIGNING_METHOD_HS512:
 		verifyKey, err = []byte(inputSecret), nil
-	case "none":
+	case SIGNING_METHOD_NONE:
 		fallthrough
 	default:
 		verifyKey, err = "", nil
@@ -264,17 +264,17 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 	token, err := jwt.Parse(inputJWTToken, func(jwtToken *jwt.Token) (interface{}, error) {
 		var ok bool
 		switch settingsSigningMethod {
-		case "ES256", "ES384", "ES512":
+		case SIGNING_METHOD_ES256, SIGNING_METHOD_ES384, SIGNING_METHOD_ES512:
 			_, ok = jwtToken.Method.(*jwt.SigningMethodECDSA)
-		case "EdDSA":
+		case SIGNING_METHOD_EdDSA:
 			_, ok = jwtToken.Method.(*jwt.SigningMethodEd25519)
-		case "HS256", "HS384", "HS512":
+		case SIGNING_METHOD_HS256, SIGNING_METHOD_HS384, SIGNING_METHOD_HS512:
 			_, ok = jwtToken.Method.(*jwt.SigningMethodHMAC)
-		case "PS256", "PS384", "PS512":
+		case SIGNING_METHOD_PS256, SIGNING_METHOD_PS384, SIGNING_METHOD_PS512:
 			_, ok = jwtToken.Method.(*jwt.SigningMethodRSAPSS)
-		case "RS256", "RS384", "RS512":
+		case SIGNING_METHOD_RS256, SIGNING_METHOD_RS384, SIGNING_METHOD_RS512:
 			_, ok = jwtToken.Method.(*jwt.SigningMethodRSA)
-		case "none":
+		case SIGNING_METHOD_NONE:
 			fallthrough
 		default:
 			ok = false

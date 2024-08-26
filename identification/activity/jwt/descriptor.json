@@ -6,7 +6,7 @@
     "description": "Identification JWT",
     "homepage": "https://github.com/pmhofman-se/flogo-jwt-activity/identification/activity/jwt",
     "author": "Peter Hofman",
-    "ref": "github.com/flogo-components/identification/activity/jwt",
+    "ref": "github.com/pmhofman-se/flogo-jwt-activity/identification/activity/jwt",
     "display": {
       "category": "identification",
       "visible": true,

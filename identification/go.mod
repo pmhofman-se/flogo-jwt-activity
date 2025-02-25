@@ -1,4 +1,4 @@
-module github.com/pmhofman-se/flogo-jwt-activity/identification/activity/jwt
+module github.com/pmhofman-se/flogo-jwt-activity/identification
 
 go 1.20
 

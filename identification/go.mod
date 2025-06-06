@@ -3,7 +3,7 @@ module github.com/pmhofman-se/flogo-jwt-activity/identification
 go 1.20
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/project-flogo/core v1.6.5
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/errgo.v2 v2.1.0

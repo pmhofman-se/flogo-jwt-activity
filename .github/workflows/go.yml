@@ -20,14 +20,17 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.20'
+        cache: false  # 👈 Disables auto-caching
+
+    - name: Change to Go subfolder
+      working-directory: ./identification  # Where go.mod/go.sum live
 
     - name: Build
-      run: go build -v ./identification/...
+      run: go build -v ./...
 
     - name: Test
       run: |
-        go test -v ./identification/...
-        go test -coverprofile=coverage.out ./identification/...
+        go test -coverprofile=coverage.out ./...
         go tool cover -func=coverage.out
         
     - name: Generate HTML report

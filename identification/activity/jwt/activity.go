@@ -17,6 +17,9 @@ func init() {
 }
 
 var activityLog = log.ChildLogger(log.RootLogger(), ACTIVITY_LOGGER)
+var activityLogSign = log.ChildLogger(activityLog, ACTIVITY_LOGGER_SIGN)
+var activityLogVerify = log.ChildLogger(activityLog, ACTIVITY_LOGGER_VERIFY)
+var activityLogDecodeOnly = log.ChildLogger(activityLog, ACTIVITY_LOGGER_DECODE_ONLY)
 
 var activityMd = activity.ToMetadata(&Settings{}, &Input{}, &Output{})
 
@@ -46,8 +49,51 @@ func (a *JWTActivity) Eval(context activity.Context) (done bool, err error) {
 		done, err = Sign(settingsSigningMethod, context)
 	case MODE_VERIFY:
 		done, err = Verify(settingsSigningMethod, context)
+	case MODE_DECODE_ONLY:
+		done, err = DecodeOnly(settingsSigningMethod, context)
 	}
 	return done, err
+}
+
+func DecodeOnly(settingsSigningMethod string, context activity.Context) (bool, error) {
+
+	input := &Input{}
+	err := context.GetInputObject(input)
+	if err != nil {
+		return false, err
+	}
+
+	inputJWTToken := input.DecodeJWTToken
+
+	// Parse the token without verifying the signature
+	token, _, err := jwt.NewParser(jwt.WithoutClaimsValidation()).ParseUnverified(inputJWTToken, jwt.MapClaims{})
+	if err != nil {
+		activityLogDecodeOnly.Errorf("Error parsing JWT: %v", err)
+		return false, err
+	}
+
+	outputHeaders := make(map[string]interface{})
+	for k, v := range token.Header {
+		outputHeaders[k] = v
+	}
+	err = context.SetOutput("OutputHeaders", outputHeaders)
+	if err != nil {
+		return false, err
+	}
+
+	outputPayload := make(map[string]interface{})
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok {
+		for k, v := range claims {
+			outputPayload[k] = v
+		}
+	}
+	err = context.SetOutput("OutputPayload", outputPayload)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func Sign(settingsSigningMethod string, context activity.Context) (bool, error) {
@@ -67,7 +113,7 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 				headers := make(map[string]interface{}, len(additionalHeaders))
 				for _, v := range inputAdditionalHeaderNames {
 					header, _ := coerce.ToObject(v)
-					activityLog.Debugf("Header: %v", header)
+					activityLogSign.Debugf("Header: %v", header)
 					if header != nil && header["Name"] != nil && header["Type"] != nil {
 						var headerVal interface{}
 						if header["Type"].(string) == "String" {
@@ -76,9 +122,9 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 							err = errors.Newf("unsupported type %v for %v", header["Type"], header["Name"])
 						}
 						if err != nil {
-							activityLog.Errorf("coercion failed with error %v for %v (type %v) value %v", err, header["Name"], header["Type"], additionalHeaders[header["Name"].(string)])
+							activityLogSign.Errorf("coercion failed with error %v for %v (type %v) value %v", err, header["Name"], header["Type"], additionalHeaders[header["Name"].(string)])
 						}
-						activityLog.Debugf("Headerval: %v Err: %v", headerVal, err)
+						activityLogSign.Debugf("Headerval: %v Err: %v", headerVal, err)
 						headers[header["Name"].(string)] = headerVal
 					}
 				}
@@ -105,7 +151,7 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 				fields := make(map[string]interface{}, len(payloadFields))
 				for _, v := range inputPayloadFieldNames {
 					field, _ := coerce.ToObject(v)
-					activityLog.Debugf("Field: %v", field)
+					activityLogSign.Debugf("Field: %v", field)
 					if field != nil && field["Name"] != nil && field["Type"] != nil {
 						var fieldVal interface{}
 						if payloadFields[field["Name"].(string)] != nil {
@@ -122,9 +168,9 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 							}
 						}
 						if err != nil {
-							activityLog.Errorf("coercion failed with error %v for %v (type %v) value %v", err, field["Name"], field["Type"], payloadFields[field["Name"].(string)])
+							activityLogSign.Errorf("coercion failed with error %v for %v (type %v) value %v", err, field["Name"], field["Type"], payloadFields[field["Name"].(string)])
 						}
-						activityLog.Debugf("Fieldval: %v Err: %v", fieldVal, err)
+						activityLogSign.Debugf("Fieldval: %v Err: %v", fieldVal, err)
 						fields[field["Name"].(string)] = fieldVal
 					}
 				}
@@ -152,7 +198,7 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 		err := errors.Newf("invalid signing method: %s. Supported: %v", settingsSigningMethod, supportedSigningMethods)
 		return false, err
 	} else {
-		activityLog.Debugf("using signing method: %v", settingsSigningMethod)
+		activityLogSign.Debugf("using signing method: %v", settingsSigningMethod)
 	}
 
 	claims := jwt.MapClaims{}
@@ -168,7 +214,7 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(inputPrivateKey)
 	if err != nil {
-		activityLog.Errorf("error decoding base64 private key: %v", err)
+		activityLogSign.Errorf("error decoding base64 private key: %v", err)
 		return false, err
 	}
 
@@ -186,19 +232,19 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 		signKey, err = jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	case SIGNING_METHOD_NONE:
 		signKey, err = nil, nil
-		activityLog.Debugf("We don't support signing method: %v. Neither does the Go jwt package!", settingsSigningMethod)
+		activityLogSign.Debugf("We don't support signing method: %v. Neither does the Go jwt package!", settingsSigningMethod)
 	default:
 		signKey, err = nil, nil
-		activityLog.Debugf("Unknown signing method: %v. We don't support it! Neither does the Go jwt package!", settingsSigningMethod)
+		activityLogSign.Debugf("Unknown signing method: %v. We don't support it! Neither does the Go jwt package!", settingsSigningMethod)
 	}
 	if err != nil {
-		activityLog.Errorf("error parsing %v private key [%v]: %v", settingsSigningMethod, decodedPrivateKey, err)
+		activityLogSign.Errorf("error parsing %v private key [%v]: %v", settingsSigningMethod, decodedPrivateKey, err)
 		return false, err
 	}
 
 	signedString, err := token.SignedString(signKey)
 	if err != nil {
-		activityLog.Errorf("error signing: %v", err)
+		activityLogSign.Errorf("error signing: %v", err)
 		return false, err
 	}
 
@@ -224,7 +270,7 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 		err := errors.Newf("invalid signing method: %s. Supported: %v", settingsSigningMethod, supportedSigningMethods)
 		return false, err
 	} else {
-		activityLog.Debugf("using signing method: %v", settingsSigningMethod)
+		activityLogVerify.Debugf("using signing method: %v", settingsSigningMethod)
 	}
 
 	var decodedPublicKey []byte
@@ -232,7 +278,7 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 	case SIGNING_METHOD_ES256, SIGNING_METHOD_ES384, SIGNING_METHOD_ES512, SIGNING_METHOD_EdDSA, SIGNING_METHOD_PS256, SIGNING_METHOD_PS384, SIGNING_METHOD_PS512, SIGNING_METHOD_RS256, SIGNING_METHOD_RS384, SIGNING_METHOD_RS512:
 		decodedPublicKey, err = base64.StdEncoding.DecodeString(inputPublicKey)
 		if err != nil {
-			activityLog.Errorf("error decoding %v public key input: %v", inputPublicKey, err)
+			activityLogVerify.Errorf("error decoding %v public key input: %v", inputPublicKey, err)
 			return false, err
 		}
 	case SIGNING_METHOD_HS256, SIGNING_METHOD_HS384, SIGNING_METHOD_HS512, SIGNING_METHOD_NONE:
@@ -254,10 +300,10 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 		fallthrough
 	default:
 		verifyKey, err = "", nil
-		activityLog.Debugf("invalid signing method selected: %v", settingsSigningMethod)
+		activityLogVerify.Debugf("invalid signing method selected: %v", settingsSigningMethod)
 	}
 	if err != nil {
-		activityLog.Errorf("error parsing %v public key: %v", settingsSigningMethod, err)
+		activityLogVerify.Errorf("error parsing %v public key: %v", settingsSigningMethod, err)
 		return false, err
 	}
 
@@ -285,7 +331,7 @@ func Verify(settingsSigningMethod string, context activity.Context) (bool, error
 		return verifyKey, nil
 	})
 	if err != nil {
-		activityLog.Debugf("verified token: %v error: %v", token, err)
+		activityLogVerify.Debugf("verified token: %v error: %v", token, err)
 		return false, err
 	}
 

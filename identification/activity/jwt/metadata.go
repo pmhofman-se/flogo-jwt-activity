@@ -22,6 +22,7 @@ type Input struct {
 	PrivateKey            string                 `md:"PrivateKey"`
 	PublicKey             string                 `md:"PublicKey"`
 	VerifyJWTToken        string                 `md:"VerifyJWTToken"`
+	DecodeJWTToken        string                 `md:"DecodeJWTToken"`
 }
 
 func (i *Input) ToMap() map[string]interface{} {
@@ -34,6 +35,7 @@ func (i *Input) ToMap() map[string]interface{} {
 		"PrivateKey":            i.PrivateKey,
 		"PublicKey":             i.PublicKey,
 		"VerifyJWTToken":        i.VerifyJWTToken,
+		"DecodeJWTToken":        i.DecodeJWTToken,
 	}
 }
 
@@ -76,6 +78,11 @@ func (i *Input) FromMap(values map[string]interface{}) error {
 	}
 
 	i.VerifyJWTToken, err = coerce.ToString(values["VerifyJWTToken"])
+	if err != nil {
+		return err
+	}
+
+	i.DecodeJWTToken, err = coerce.ToString(values["DecodeJWTToken"])
 	if err != nil {
 		return err
 	}

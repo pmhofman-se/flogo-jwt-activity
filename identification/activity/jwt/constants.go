@@ -1,12 +1,16 @@
 package jwt
 
 const (
-	ACTIVITY_LOGGER = "jwt-activity-jwtsign"
+	ACTIVITY_LOGGER = "jwt-activity"
+	ACTIVITY_LOGGER_SIGN = "jwt-activity-sign"
+	ACTIVITY_LOGGER_VERIFY = "jwt-activity-verify"
+	ACTIVITY_LOGGER_DECODE_ONLY = "jwt-activity-decodeonly"
 )
 
 const (
 	MODE_SIGN = "Sign"
 	MODE_VERIFY = "Verify"
+	MODE_DECODE_ONLY = "DecodeOnly"
 )
 
 const (

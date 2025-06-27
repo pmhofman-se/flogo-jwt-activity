@@ -1,7 +1,7 @@
 {
     "name": "jwt",
     "type": "flogo:activity",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "title": "Identification JWT",
     "description": "Identification JWT",
     "homepage": "https://github.com/pmhofman-se/flogo-jwt-activity/identification/activity/jwt",

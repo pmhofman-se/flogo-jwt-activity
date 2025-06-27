@@ -25,4 +25,24 @@ jobs:
       run: go build -v ./identification/...
 
     - name: Test
-      run: go test -v ./identification/...
+      run: |
+        go test -v ./identification/...
+        go test -coverprofile=coverage.out ./identification/...
+        go tool cover -func=coverage.out
+        
+    - name: Generate HTML report
+      run: go tool cover -html=coverage.out -o coverage.html
+     
+    - name: Check minimum coverage  # <-- FAIL LATE (after reports are ready)
+      run: |
+        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "❌ Coverage too low: $COVERAGE% (< 80%)"
+          exit 1
+        fi
+
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.html

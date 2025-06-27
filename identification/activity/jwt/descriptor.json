@@ -15,6 +15,17 @@
     },
     "settings": [
       {
+        "name": "Mode",
+        "type": "string",
+        "required": true,
+        "display": {
+          "name": "Mode",
+          "description": "Operation mode"
+        },
+        "allowed": ["Sign","Verify","DecodeOnly"],
+        "value": "Sign"
+      },
+      {
         "name": "SigningMethod",
         "type": "string",
         "required": true,
@@ -24,17 +35,6 @@
         },
         "allowed": ["ES256", "ES384", "ES512", "EdDSA", "HS256", "HS384", "HS512", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512"],
         "value": "RS256"
-      },
-      {
-        "name": "Mode",
-        "type": "string",
-        "required": true,
-        "display": {
-          "name": "Mode",
-          "description": "Operation mode"
-        },
-        "allowed": ["Sign","Verify"],
-        "value": "Sign"
       }
     ],
     "inputs":[
@@ -89,6 +89,11 @@
       },
       {
         "name": "VerifyJWTToken",
+        "type": "string",
+        "required": false
+      },
+      {
+        "name": "DecodeJWTToken",
         "type": "string",
         "required": false
       }

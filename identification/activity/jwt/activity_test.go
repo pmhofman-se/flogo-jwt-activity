@@ -362,6 +362,46 @@ func TestVerify_none_Unsupported(t *testing.T) {
 	assert.False(t, done)
 }
 
+func TestDecodeOnly_none_Unsupported(t *testing.T) {
+
+	/*
+		Set up activity Settings
+	*/
+	settingsSigningMethod := "none"
+	settingsMode := "DecodeOnly"
+	settingsSign := &Settings{
+		SigningMethod: settingsSigningMethod,
+		Mode:          settingsMode,
+	}
+
+	initContextSign := test.NewActivityInitContext(settingsSign, nil)
+	actSign, err := New(initContextSign)
+	assert.Nil(t, err)
+
+	tcSign := test.NewActivityContext(actSign.Metadata())
+
+	/*
+		Set the activity inputs
+	*/
+	outputHeaderNames := CreateEmptyHeaderNames()
+	_ = tcSign.SetOutput("OutputHeaderNames", outputHeaderNames)
+
+	outputHeaders := CreateEmptyHeaders()
+	_ = tcSign.SetOutput("OutputHeaders", outputHeaders)
+
+	outputPayloadFieldNames := CreatePayloadFieldNames()
+	_ = tcSign.SetOutput("OutputPayloadFieldNames", outputPayloadFieldNames)
+
+	outputPayload := CreatePayload()
+	tcSign.SetInput("OutputPayload", outputPayload)
+	tcSign.SetInput("PublicKey", "")
+
+	done, err := actSign.Eval(tcSign)
+	assert.NotNil(t, err, "error signing: token is unverifiable: 'none' signature type is not allowed")
+	assert.Equal(t, "", tcSign.GetOutput("JWTToken"))
+	assert.False(t, done)
+}
+
 func TestSign_NoSignMethod_Unsupported(t *testing.T) {
 
 	/*
@@ -743,4 +783,122 @@ func TestJWTSign_RSA256_Drillster(t *testing.T) {
 
 	signingMethod := "RS256" // needed to get the file (kid.txt) with the key id for the Drillster specific header "kid"
 	SignAndVerifyTest(signingMethod, CreateDrillsterHeaderNames(), CreateDrillsterHeaders(signingMethod, t), CreatePayloadFieldNames(), CreatePayload(), t)
+}
+
+func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map[string]interface{}, additionalHeaders map[string]interface{}, payloadFieldNames []map[string]interface{}, payload map[string]interface{}, t *testing.T) {
+
+	/*
+		Set up activity Settings
+	*/
+	settingsSigningMethod := testSigningMethod
+	settingsSign := &Settings{
+		SigningMethod: settingsSigningMethod,
+		Mode:          "Sign",
+	}
+
+	initContext := test.NewActivityInitContext(settingsSign, nil)
+	actSign, err := New(initContext)
+	assert.Nil(t, err)
+
+	tcSign := test.NewActivityContext(actSign.Metadata())
+
+	/*
+		Set the activity inputs
+	*/
+	tcSign.SetInput("AdditionalHeaderNames", additionalHeaderNames)
+
+	tcSign.SetInput("AdditionalHeaders", additionalHeaders)
+	jsonInputHeaders, _ := json.Marshal(additionalHeaders)
+	t.Logf("input headers:\n%v", string(jsonInputHeaders))
+
+	tcSign.SetInput("PayloadFieldNames", payloadFieldNames)
+
+	tcSign.SetInput("Payload", payload)
+	jsonInputPayload, _ := json.Marshal(payload)
+	t.Logf("input payload:\n%v", string(jsonInputPayload))
+
+	switch settingsSigningMethod {
+	case "ES256", "ES384", "ES512", "EdDSA", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
+		privateKeyFile, err := ReadPrivateKey(settingsSigningMethod, t)
+		assert.Nil(t, err)
+		base64PrivateKeyString := base64.StdEncoding.EncodeToString(privateKeyFile)
+		t.Logf("private key base64 encoded:\n%v", base64PrivateKeyString)
+		assert.NotEmpty(t, base64PrivateKeyString)
+
+		tcSign.SetInput("PrivateKey", base64PrivateKeyString)
+	case "HS256", "HS384", "HS512":
+		secretFile, err := ReadSecret(settingsSigningMethod, t)
+		assert.Nil(t, err)
+
+		tcSign.SetInput("Secret", string(secretFile))
+	case "none":
+		fallthrough
+	default:
+	}
+
+	/*
+		Run activity
+	*/
+	doneSign, err := actSign.Eval(tcSign)
+	assert.Nil(t, err)
+	assert.True(t, doneSign)
+
+	/*
+		Collect the output
+	*/
+	generatedToken := tcSign.GetOutput("JWTToken")
+	t.Logf("output token: %v", generatedToken)
+
+	settingsDecodeOnly := &Settings{
+		Mode:          "DecodeOnly",
+	}
+	initContextDecodeOnly := test.NewActivityInitContext(settingsDecodeOnly, nil)
+	actDecodeOnly, err := New(initContextDecodeOnly)
+	assert.Nil(t, err)
+
+	tcDecodeOnly := test.NewActivityContext(actDecodeOnly.Metadata())
+
+	/*
+		Set the activity inputs for Verify
+	*/
+
+	tcDecodeOnly.SetInput("DecodeJWTToken", generatedToken)
+
+	doneDecodeOnly, err := actDecodeOnly.Eval(tcDecodeOnly)
+	assert.Nil(t, err)
+	assert.True(t, doneDecodeOnly)
+
+	outputHeaders, err := coerce.ToObject(tcDecodeOnly.GetOutput("OutputHeaders"))
+	assert.Nil(t, err)
+	assert.Equal(t, settingsSigningMethod, outputHeaders["alg"])
+	assert.Equal(t, "JWT", outputHeaders["typ"])
+	assert.Equal(t, 2+len(additionalHeaderNames), len(outputHeaders))
+	jsonOutputHeaders, _ := json.Marshal(outputHeaders)
+	t.Logf("output payload:\n%v", string(jsonOutputHeaders))
+
+	outputPayload, err := coerce.ToObject(tcDecodeOnly.GetOutput("OutputPayload"))
+	assert.Nil(t, err)
+	assert.Equal(t, len(payload), len(outputPayload))
+	for _, field := range payloadFieldNames {
+		if field["Type"].(string) == "Number" {
+			numExpected, _ := ParseNumber(payload[field["Name"].(string)])
+			numActual, _ := ParseNumber(outputPayload[field["Name"].(string)])
+			assert.Equal(t, numExpected, numActual)
+		} else if field["Type"].(string) == "Array" {
+			pl, _ := coerce.ToArray(payload[field["Name"].(string)])
+			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
+		} else if field["Type"].(string) == "Object" {
+			pl, _ := coerce.ToObject(payload[field["Name"].(string)])
+			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
+		} else {
+			assert.Equal(t, payload[field["Name"].(string)], outputPayload[field["Name"].(string)])
+		}
+	}
+	jsonOutputPayload, _ := json.Marshal(outputPayload)
+	t.Logf("output payload:\n%v", string(jsonOutputPayload))
+}
+
+func TestJWTSignAndDecode_RS256_WithObject(t *testing.T) {
+
+	SignAndDecodeOnlyTest("RS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNamesWithObject(), CreatePayloadWithObject(), t)
 }

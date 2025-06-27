@@ -109,10 +109,22 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
     }
 
     validate = (fieldName: string, context: IActivityContribution): Observable<IValidationResult> | IValidationResult => {
+        if (fieldName === "SigningMethod") {
+            let vresult: IValidationResult = ValidationResult.newValidationResult();
+            let mode: IFieldDefinition = context.getField("Mode")
+            if (mode.value && (mode.value == "Sign" || mode.value == "Verify")) {
+                vresult.setVisible(true);
+            } else {
+                vresult.setVisible(false);
+            }
+            return vresult;
+        }
         if (fieldName === "Secret") {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
             let signingMethod: IFieldDefinition = context.getField("SigningMethod")
-            if (signingMethod.value && (signingMethod.value == "HS256" || signingMethod.value == "HS384" || signingMethod.value == "HS512")) {
+            let mode: IFieldDefinition = context.getField("Mode")
+            if ((mode.value && (mode.value == "Sign" || mode.value == "Verify")) &&
+                (signingMethod.value && (signingMethod.value == "HS256" || signingMethod.value == "HS384" || signingMethod.value == "HS512"))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
@@ -124,7 +136,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             let signingMethod: IFieldDefinition = context.getField("SigningMethod")
             let mode: IFieldDefinition = context.getField("Mode")
             if ((mode.value && (mode.value == "Sign")) && 
-               (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
+                (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
@@ -154,6 +166,17 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             return vresult;
 
         }
+        if (fieldName === "DecodeJWTToken") {
+            let vresult: IValidationResult = ValidationResult.newValidationResult();
+            let mode: IFieldDefinition = context.getField("Mode")
+            if (mode.value && (mode.value == "DecodeOnly")) {
+                vresult.setVisible(true);
+            } else {
+                vresult.setVisible(false);
+            }
+            return vresult;
+
+        }
         if ((fieldName === "AdditionalHeaders") || (fieldName === "AdditionalHeaderNames") || (fieldName === "Payload") || (fieldName === "PayloadFieldNames")) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
             let mode: IFieldDefinition = context.getField("Mode")
@@ -168,7 +191,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
         if ((fieldName === "OutputHeaders") || (fieldName === "OutputHeaderNames") || (fieldName === "OutputPayload") || (fieldName === "OutputPayloadFieldNames")) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
             let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "Verify")) {
+            if (mode.value && (mode.value == "Verify" || mode.value == "DecodeOnly")) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);

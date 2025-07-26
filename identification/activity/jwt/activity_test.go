@@ -244,6 +244,10 @@ func TestMetaData(t *testing.T) {
 	v := input.ToMap()
 	assert.NotNil(t, v)
 
+	v["AdditionalHeaderNames"] = 1
+	err = input.FromMap(v)
+	assert.Nil(t, err)
+
 	v["AdditionalHeaders"] = 1
 	err = input.FromMap(v)
 	assert.NotNil(t, err)
@@ -260,6 +264,10 @@ func TestMetaData(t *testing.T) {
 
 	v = output.ToMap()
 	assert.NotNil(t, v)
+
+	v["OutputHeaderNames"] = 3
+	err = output.FromMap(v)
+	assert.Nil(t, err)
 
 	v["OutputHeaders"] = 3
 	err = output.FromMap(v)
@@ -850,7 +858,7 @@ func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map
 	t.Logf("output token: %v", generatedToken)
 
 	settingsDecodeOnly := &Settings{
-		Mode:          "DecodeOnly",
+		Mode: "DecodeOnly",
 	}
 	initContextDecodeOnly := test.NewActivityInitContext(settingsDecodeOnly, nil)
 	actDecodeOnly, err := New(initContextDecodeOnly)

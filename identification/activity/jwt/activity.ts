@@ -148,7 +148,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             let signingMethod: IFieldDefinition = context.getField("SigningMethod")
             let mode: IFieldDefinition = context.getField("Mode")
             if ((mode.value && (mode.value == "Verify")) && 
-               (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
+                (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);

@@ -1,15 +1,15 @@
 package jwt
 
 const (
-	ACTIVITY_LOGGER = "jwt-activity"
-	ACTIVITY_LOGGER_SIGN = "jwt-activity-sign"
-	ACTIVITY_LOGGER_VERIFY = "jwt-activity-verify"
+	ACTIVITY_LOGGER             = "jwt-activity"
+	ACTIVITY_LOGGER_SIGN        = "jwt-activity-sign"
+	ACTIVITY_LOGGER_VERIFY      = "jwt-activity-verify"
 	ACTIVITY_LOGGER_DECODE_ONLY = "jwt-activity-decodeonly"
 )
 
 const (
-	MODE_SIGN = "Sign"
-	MODE_VERIFY = "Verify"
+	MODE_SIGN        = "Sign"
+	MODE_VERIFY      = "Verify"
 	MODE_DECODE_ONLY = "DecodeOnly"
 )
 
@@ -27,5 +27,5 @@ const (
 	SIGNING_METHOD_RS256 = "RS256"
 	SIGNING_METHOD_RS384 = "RS384"
 	SIGNING_METHOD_RS512 = "RS512"
-	SIGNING_METHOD_NONE = "none"
+	SIGNING_METHOD_NONE  = "none"
 )

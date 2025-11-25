@@ -20,7 +20,7 @@ import {
 @WiContrib({})
 @Injectable()
 export class JWTActivityContribution extends WiServiceHandlerContribution {
-    constructor( @Inject(Injector) injector, private http: Http) {
+    constructor(@Inject(Injector) injector, private http: Http) {
         super(injector, http);
     }
 
@@ -103,7 +103,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
                 return JSON.stringify(jsonSchema);
             }
             return "{}";
-        } 
+        }
 
         return null;
     }
@@ -135,7 +135,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
             let signingMethod: IFieldDefinition = context.getField("SigningMethod")
             let mode: IFieldDefinition = context.getField("Mode")
-            if ((mode.value && (mode.value == "Sign")) && 
+            if ((mode.value && (mode.value == "Sign")) &&
                 (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
                 vresult.setVisible(true);
             } else {
@@ -147,7 +147,7 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
             let signingMethod: IFieldDefinition = context.getField("SigningMethod")
             let mode: IFieldDefinition = context.getField("Mode")
-            if ((mode.value && (mode.value == "Verify")) && 
+            if ((mode.value && (mode.value == "Verify")) &&
                 (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
                 vresult.setVisible(true);
             } else {

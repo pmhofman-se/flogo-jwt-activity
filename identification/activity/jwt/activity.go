@@ -155,15 +155,16 @@ func Sign(settingsSigningMethod string, context activity.Context) (bool, error) 
 					if field != nil && field["Name"] != nil && field["Type"] != nil {
 						var fieldVal interface{}
 						if payloadFields[field["Name"].(string)] != nil {
-							if field["Type"].(string) == "String" {
+							switch field["Type"].(string) {
+							case "String":
 								fieldVal, err = coerce.ToString(payloadFields[field["Name"].(string)])
-							} else if field["Type"].(string) == "Number" {
+							case "Number":
 								fieldVal, err = ParseNumber(payloadFields[field["Name"].(string)])
-							} else if field["Type"].(string) == "Object" {
+							case "Object":
 								fieldVal, err = coerce.ToObject(payloadFields[field["Name"].(string)])
-							} else if field["Type"].(string) == "Array" {
+							case "Array":
 								fieldVal, err = coerce.ToArray(payloadFields[field["Name"].(string)])
-							} else {
+							default:
 								err = errors.Newf("unsupported type %v for %v", field["Type"], field["Name"])
 							}
 						}

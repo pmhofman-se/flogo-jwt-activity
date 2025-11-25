@@ -17,7 +17,7 @@ const (
 	KEYS_BASE_PATH = "../../../testdata/"
 )
 
-func GetKeyPath(signingMethod string) string {
+func getKeyPath(signingMethod string) string {
 	switch signingMethod {
 	case "ES256":
 		return KEYS_BASE_PATH + "ecdsa/es256/"
@@ -38,58 +38,58 @@ func GetKeyPath(signingMethod string) string {
 	}
 }
 
-func ReadPrivateKey(signingMethod string, t *testing.T) ([]byte, error) {
-	privateKeyFile, err := os.ReadFile(GetKeyPath(signingMethod) + "private.pem")
+func readPrivateKey(signingMethod string, t *testing.T) ([]byte, error) {
+	privateKeyFile, err := os.ReadFile(getKeyPath(signingMethod) + "private.pem")
 	t.Logf("private key read:\n%v", string(privateKeyFile))
 	return privateKeyFile, err
 }
 
-func ReadPublicKey(signingMethod string, t *testing.T) ([]byte, error) {
-	publicKeyFile, err := os.ReadFile(GetKeyPath(signingMethod) + "public.pem")
+func readPublicKey(signingMethod string, t *testing.T) ([]byte, error) {
+	publicKeyFile, err := os.ReadFile(getKeyPath(signingMethod) + "public.pem")
 	t.Logf("public key read:\n%v", string(publicKeyFile))
 	return publicKeyFile, err
 }
 
-func ReadKeyId(signingMethod string, t *testing.T) ([]byte, error) {
-	publicKeyFile, err := os.ReadFile(GetKeyPath(signingMethod) + "kid.txt")
+func readKeyId(signingMethod string, t *testing.T) ([]byte, error) {
+	publicKeyFile, err := os.ReadFile(getKeyPath(signingMethod) + "kid.txt")
 	t.Logf("public key read:\n%v", string(publicKeyFile))
 	return publicKeyFile, err
 }
 
-func ReadSecret(signingMethod string, t *testing.T) ([]byte, error) {
-	publicKeyFile, err := os.ReadFile(GetKeyPath(signingMethod) + "secret.txt")
+func readSecret(signingMethod string, t *testing.T) ([]byte, error) {
+	publicKeyFile, err := os.ReadFile(getKeyPath(signingMethod) + "secret.txt")
 	t.Logf("secret read:\n%v", string(publicKeyFile))
 	return publicKeyFile, err
 }
 
-func CreateEmptyHeaderNames() []map[string]interface{} {
+func createEmptyHeaderNames() []map[string]interface{} {
 	return make([]map[string]interface{}, 0)
 }
 
-func CreateEmptyHeaders() map[string]interface{} {
+func createEmptyHeaders() map[string]interface{} {
 	return make(map[string]interface{})
 }
 
-func CreateHeaderNamesWithUnsupportedType() []map[string]interface{} {
+func createHeaderNamesWithUnsupportedType() []map[string]interface{} {
 	ahn := make([]map[string]interface{}, 1)
 	ahn[0] = map[string]interface{}{"Name": "dummy", "Type": "Dummy"}
 	return ahn
 }
 
-func CreateHeadersWithUnsupportedType() map[string]interface{} {
+func createHeadersWithUnsupportedType() map[string]interface{} {
 	ah := make(map[string]interface{})
 	ah["dummy"] = "nonsense"
 	return ah
 }
 
-func CreateDrillsterHeaderNames() []map[string]interface{} {
+func createDrillsterHeaderNames() []map[string]interface{} {
 	ahn := make([]map[string]interface{}, 1)
 	ahn[0] = map[string]interface{}{"Name": "kid", "Type": "String"}
 	return ahn
 }
 
-func CreateDrillsterHeaders(signingMethod string, t *testing.T) map[string]interface{} {
-	keyIdFile, err := ReadKeyId(signingMethod, t)
+func createDrillsterHeaders(signingMethod string, t *testing.T) map[string]interface{} {
+	keyIdFile, err := readKeyId(signingMethod, t)
 	ah := make(map[string]interface{})
 	if err != nil {
 		t.Logf("error reading Key Id: %v. Key Id not added in headers.", err)
@@ -100,7 +100,7 @@ func CreateDrillsterHeaders(signingMethod string, t *testing.T) map[string]inter
 	return ah
 }
 
-func CreatePayloadFieldNames() []map[string]interface{} {
+func createPayloadFieldNames() []map[string]interface{} {
 	pfn := make([]map[string]interface{}, 5)
 	pfn[0] = map[string]interface{}{"Name": "iss", "Type": "String"}
 	pfn[1] = map[string]interface{}{"Name": "sub", "Type": "String"}
@@ -110,13 +110,13 @@ func CreatePayloadFieldNames() []map[string]interface{} {
 	return pfn
 }
 
-func CreatePayloadFieldNamesWithUnsupportedType() []map[string]interface{} {
+func createPayloadFieldNamesWithUnsupportedType() []map[string]interface{} {
 	pfn := make([]map[string]interface{}, 1)
 	pfn[0] = map[string]interface{}{"Name": "dummy", "Type": "Dummy"}
 	return pfn
 }
 
-func CreatePayload() map[string]interface{} {
+func createPayload() map[string]interface{} {
 	p := make(map[string]interface{})
 	p["aud"] = "some_audience"
 	currentTime := time.Now().UTC().Unix()
@@ -127,13 +127,13 @@ func CreatePayload() map[string]interface{} {
 	return p
 }
 
-func CreatePayloadWithUnsupportedType() map[string]interface{} {
+func createPayloadWithUnsupportedType() map[string]interface{} {
 	p := make(map[string]interface{})
 	p["dummy"] = "nonsense"
 	return p
 }
 
-func CreatePayloadFieldNamesWithArray() []map[string]interface{} {
+func createPayloadFieldNamesWithArray() []map[string]interface{} {
 	pfn := make([]map[string]interface{}, 6)
 	pfn[0] = map[string]interface{}{"Name": "iss", "Type": "String"}
 	pfn[1] = map[string]interface{}{"Name": "sub", "Type": "String"}
@@ -144,7 +144,7 @@ func CreatePayloadFieldNamesWithArray() []map[string]interface{} {
 	return pfn
 }
 
-func CreatePayloadWithArray() map[string]interface{} {
+func createPayloadWithArray() map[string]interface{} {
 	p := make(map[string]interface{})
 	p["aud"] = "some_audience"
 	currentTime := time.Now().UTC().Unix()
@@ -159,7 +159,7 @@ func CreatePayloadWithArray() map[string]interface{} {
 	return p
 }
 
-func CreatePayloadFieldNamesWithObject() []map[string]interface{} {
+func createPayloadFieldNamesWithObject() []map[string]interface{} {
 	pfn := make([]map[string]interface{}, 6)
 	pfn[0] = map[string]interface{}{"Name": "iss", "Type": "String"}
 	pfn[1] = map[string]interface{}{"Name": "sub", "Type": "String"}
@@ -170,7 +170,7 @@ func CreatePayloadFieldNamesWithObject() []map[string]interface{} {
 	return pfn
 }
 
-func CreatePayloadWithObject() map[string]interface{} {
+func createPayloadWithObject() map[string]interface{} {
 	p := make(map[string]interface{})
 	p["aud"] = "some_audience"
 	currentTime := time.Now().UTC().Unix()
@@ -184,7 +184,7 @@ func CreatePayloadWithObject() map[string]interface{} {
 	p["object"] = obj
 	return p
 }
-func CreateDrillsterPayload() map[string]interface{} {
+func createDrillsterPayload() map[string]interface{} {
 	p := make(map[string]interface{})
 	p["aud"] = "https://www.drillster.com/daas/oauth/token"
 	currentTime := time.Now().UTC().Unix()
@@ -311,16 +311,16 @@ func TestSign_none_Unsupported(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	additionalHeaderNames := CreateEmptyHeaderNames()
+	additionalHeaderNames := createEmptyHeaderNames()
 	tcSign.SetInput("AdditionalHeaderNames", additionalHeaderNames)
 
-	additionalHeaders := CreateEmptyHeaders()
+	additionalHeaders := createEmptyHeaders()
 	tcSign.SetInput("AdditionalHeaders", additionalHeaders)
 
-	payloadFieldNames := CreatePayloadFieldNames()
+	payloadFieldNames := createPayloadFieldNames()
 	tcSign.SetInput("PayloadFieldNames", payloadFieldNames)
 
-	payload := CreatePayload()
+	payload := createPayload()
 	tcSign.SetInput("Payload", payload)
 	tcSign.SetInput("PrivateKey", "")
 
@@ -351,16 +351,16 @@ func TestVerify_none_Unsupported(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	outputHeaderNames := CreateEmptyHeaderNames()
+	outputHeaderNames := createEmptyHeaderNames()
 	_ = tcSign.SetOutput("OutputHeaderNames", outputHeaderNames)
 
-	outputHeaders := CreateEmptyHeaders()
+	outputHeaders := createEmptyHeaders()
 	_ = tcSign.SetOutput("OutputHeaders", outputHeaders)
 
-	outputPayloadFieldNames := CreatePayloadFieldNames()
+	outputPayloadFieldNames := createPayloadFieldNames()
 	_ = tcSign.SetOutput("OutputPayloadFieldNames", outputPayloadFieldNames)
 
-	outputPayload := CreatePayload()
+	outputPayload := createPayload()
 	tcSign.SetInput("OutputPayload", outputPayload)
 	tcSign.SetInput("PublicKey", "")
 
@@ -391,16 +391,16 @@ func TestDecodeOnly_none_Unsupported(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	outputHeaderNames := CreateEmptyHeaderNames()
+	outputHeaderNames := createEmptyHeaderNames()
 	_ = tcSign.SetOutput("OutputHeaderNames", outputHeaderNames)
 
-	outputHeaders := CreateEmptyHeaders()
+	outputHeaders := createEmptyHeaders()
 	_ = tcSign.SetOutput("OutputHeaders", outputHeaders)
 
-	outputPayloadFieldNames := CreatePayloadFieldNames()
+	outputPayloadFieldNames := createPayloadFieldNames()
 	_ = tcSign.SetOutput("OutputPayloadFieldNames", outputPayloadFieldNames)
 
-	outputPayload := CreatePayload()
+	outputPayload := createPayload()
 	tcSign.SetInput("OutputPayload", outputPayload)
 	tcSign.SetInput("PublicKey", "")
 
@@ -431,16 +431,16 @@ func TestSign_NoSignMethod_Unsupported(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	outputHeaderNames := CreateEmptyHeaderNames()
+	outputHeaderNames := createEmptyHeaderNames()
 	_ = tcSign.SetOutput("OutputHeaderNames", outputHeaderNames)
 
-	outputHeaders := CreateEmptyHeaders()
+	outputHeaders := createEmptyHeaders()
 	_ = tcSign.SetOutput("OutputHeaders", outputHeaders)
 
-	outputPayloadFieldNames := CreatePayloadFieldNames()
+	outputPayloadFieldNames := createPayloadFieldNames()
 	_ = tcSign.SetOutput("OutputPayloadFieldNames", outputPayloadFieldNames)
 
-	outputPayload := CreatePayload()
+	outputPayload := createPayload()
 	tcSign.SetInput("OutputPayload", outputPayload)
 	tcSign.SetInput("PublicKey", "")
 
@@ -472,16 +472,16 @@ func TestVerify_NoSignMethod_Unsupported(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	additionalHeaderNames := CreateEmptyHeaderNames()
+	additionalHeaderNames := createEmptyHeaderNames()
 	tcSign.SetInput("AdditionalHeaderNames", additionalHeaderNames)
 
-	additionalHeaders := CreateEmptyHeaders()
+	additionalHeaders := createEmptyHeaders()
 	tcSign.SetInput("AdditionalHeaders", additionalHeaders)
 
-	payloadFieldNames := CreatePayloadFieldNames()
+	payloadFieldNames := createPayloadFieldNames()
 	tcSign.SetInput("PayloadFieldNames", payloadFieldNames)
 
-	payload := CreatePayload()
+	payload := createPayload()
 	tcSign.SetInput("Payload", payload)
 	tcSign.SetInput("PrivateKey", "")
 
@@ -513,19 +513,19 @@ func TestJWTSign_UnsupportedHeaderType(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	additionalHeaderNames := CreateHeaderNamesWithUnsupportedType()
+	additionalHeaderNames := createHeaderNamesWithUnsupportedType()
 	tcSign.SetInput("AdditionalHeaderNames", additionalHeaderNames)
 
-	additionalHeaders := CreateHeadersWithUnsupportedType()
+	additionalHeaders := createHeadersWithUnsupportedType()
 	tcSign.SetInput("AdditionalHeaders", additionalHeaders)
 
-	payloadFieldNames := CreatePayloadFieldNames()
+	payloadFieldNames := createPayloadFieldNames()
 	tcSign.SetInput("PayloadFieldNames", payloadFieldNames)
 
-	payload := CreatePayload()
+	payload := createPayload()
 	tcSign.SetInput("Payload", payload)
 
-	privateKeyFile, _ := ReadPrivateKey(settingsSigningMethod, t)
+	privateKeyFile, _ := readPrivateKey(settingsSigningMethod, t)
 	base64PrivateKeyString := base64.StdEncoding.EncodeToString(privateKeyFile)
 	tcSign.SetInput("PrivateKey", base64PrivateKeyString)
 
@@ -557,19 +557,19 @@ func TestJWTSign_UnsupportedPayloadFieldType(t *testing.T) {
 	/*
 		Set the activity inputs
 	*/
-	additionalHeaderNames := CreateEmptyHeaderNames()
+	additionalHeaderNames := createEmptyHeaderNames()
 	tcSign.SetInput("AdditionalHeaderNames", additionalHeaderNames)
 
-	additionalHeaders := CreateEmptyHeaders()
+	additionalHeaders := createEmptyHeaders()
 	tcSign.SetInput("AdditionalHeaders", additionalHeaders)
 
-	payloadFieldNames := CreatePayloadFieldNamesWithUnsupportedType()
+	payloadFieldNames := createPayloadFieldNamesWithUnsupportedType()
 	tcSign.SetInput("PayloadFieldNames", payloadFieldNames)
 
-	payload := CreatePayloadWithUnsupportedType()
+	payload := createPayloadWithUnsupportedType()
 	tcSign.SetInput("Payload", payload)
 
-	privateKeyFile, _ := ReadPrivateKey(settingsSigningMethod, t)
+	privateKeyFile, _ := readPrivateKey(settingsSigningMethod, t)
 	base64PrivateKeyString := base64.StdEncoding.EncodeToString(privateKeyFile)
 	tcSign.SetInput("PrivateKey", base64PrivateKeyString)
 
@@ -614,7 +614,7 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 
 	switch settingsSigningMethod {
 	case "ES256", "ES384", "ES512", "EdDSA", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
-		privateKeyFile, err := ReadPrivateKey(settingsSigningMethod, t)
+		privateKeyFile, err := readPrivateKey(settingsSigningMethod, t)
 		assert.Nil(t, err)
 		base64PrivateKeyString := base64.StdEncoding.EncodeToString(privateKeyFile)
 		t.Logf("private key base64 encoded:\n%v", base64PrivateKeyString)
@@ -622,7 +622,7 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 
 		tcSign.SetInput("PrivateKey", base64PrivateKeyString)
 	case "HS256", "HS384", "HS512":
-		secretFile, err := ReadSecret(settingsSigningMethod, t)
+		secretFile, err := readSecret(settingsSigningMethod, t)
 		assert.Nil(t, err)
 
 		tcSign.SetInput("Secret", string(secretFile))
@@ -661,7 +661,7 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 	tcVerify.SetInput("VerifyJWTToken", generatedToken)
 	switch settingsSigningMethod {
 	case "ES256", "ES384", "ES512", "EdDSA", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
-		publicKeyFile, err := ReadPublicKey(settingsSigningMethod, t)
+		publicKeyFile, err := readPublicKey(settingsSigningMethod, t)
 		assert.Nil(t, err)
 		base64PublicKeyString := base64.StdEncoding.EncodeToString(publicKeyFile)
 		t.Logf("private key base64 encoded:\n%v", base64PublicKeyString)
@@ -669,7 +669,7 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 
 		tcVerify.SetInput("PublicKey", base64PublicKeyString)
 	case "HS256", "HS384", "HS512":
-		secretFile, err := ReadSecret(settingsSigningMethod, t)
+		secretFile, err := readSecret(settingsSigningMethod, t)
 		assert.Nil(t, err)
 
 		tcVerify.SetInput("Secret", string(secretFile))
@@ -694,17 +694,18 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 	assert.Nil(t, err)
 	assert.Equal(t, len(payload), len(outputPayload))
 	for _, field := range payloadFieldNames {
-		if field["Type"].(string) == "Number" {
+		switch field["Type"].(string) {
+		case "Number":
 			numExpected, _ := ParseNumber(payload[field["Name"].(string)])
 			numActual, _ := ParseNumber(outputPayload[field["Name"].(string)])
 			assert.Equal(t, numExpected, numActual)
-		} else if field["Type"].(string) == "Array" {
+		case "Array":
 			pl, _ := coerce.ToArray(payload[field["Name"].(string)])
 			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
-		} else if field["Type"].(string) == "Object" {
+		case "Object":
 			pl, _ := coerce.ToObject(payload[field["Name"].(string)])
 			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
-		} else {
+		default:
 			assert.Equal(t, payload[field["Name"].(string)], outputPayload[field["Name"].(string)])
 		}
 	}
@@ -714,83 +715,83 @@ func SignAndVerifyTest(testSigningMethod string, additionalHeaderNames []map[str
 
 func TestJWTSign_EdDSA(t *testing.T) {
 
-	SignAndVerifyTest("EdDSA", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("EdDSA", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_HS256(t *testing.T) {
 
-	SignAndVerifyTest("HS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("HS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_HS384(t *testing.T) {
 
-	SignAndVerifyTest("HS384", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("HS384", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_HS512(t *testing.T) {
 
-	SignAndVerifyTest("HS512", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("HS512", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_ES256(t *testing.T) {
 
-	SignAndVerifyTest("ES256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("ES256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_ES384(t *testing.T) {
 
-	SignAndVerifyTest("ES384", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("ES384", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_ES512(t *testing.T) {
 
-	SignAndVerifyTest("ES512", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("ES512", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_PS256(t *testing.T) {
 
-	SignAndVerifyTest("PS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("PS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_PS384(t *testing.T) {
 
-	SignAndVerifyTest("PS384", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("PS384", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_PS512(t *testing.T) {
 
-	SignAndVerifyTest("PS512", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("PS512", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_RS256(t *testing.T) {
 
-	SignAndVerifyTest("RS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("RS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_RS384(t *testing.T) {
 
-	SignAndVerifyTest("RS384", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("RS384", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_RS512(t *testing.T) {
 
-	SignAndVerifyTest("RS512", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest("RS512", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNames(), createPayload(), t)
 }
 
 func TestJWTSign_RS256_WithArray(t *testing.T) {
 
-	SignAndVerifyTest("RS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNamesWithArray(), CreatePayloadWithArray(), t)
+	SignAndVerifyTest("RS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNamesWithArray(), createPayloadWithArray(), t)
 }
 
 func TestJWTSign_RS256_WithObject(t *testing.T) {
 
-	SignAndVerifyTest("RS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNamesWithObject(), CreatePayloadWithObject(), t)
+	SignAndVerifyTest("RS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNamesWithObject(), createPayloadWithObject(), t)
 }
 
 func TestJWTSign_RSA256_Drillster(t *testing.T) {
 
 	signingMethod := "RS256" // needed to get the file (kid.txt) with the key id for the Drillster specific header "kid"
-	SignAndVerifyTest(signingMethod, CreateDrillsterHeaderNames(), CreateDrillsterHeaders(signingMethod, t), CreatePayloadFieldNames(), CreatePayload(), t)
+	SignAndVerifyTest(signingMethod, createDrillsterHeaderNames(), createDrillsterHeaders(signingMethod, t), createPayloadFieldNames(), createDrillsterPayload(), t)
 }
 
 func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map[string]interface{}, additionalHeaders map[string]interface{}, payloadFieldNames []map[string]interface{}, payload map[string]interface{}, t *testing.T) {
@@ -827,7 +828,7 @@ func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map
 
 	switch settingsSigningMethod {
 	case "ES256", "ES384", "ES512", "EdDSA", "PS256", "PS384", "PS512", "RS256", "RS384", "RS512":
-		privateKeyFile, err := ReadPrivateKey(settingsSigningMethod, t)
+		privateKeyFile, err := readPrivateKey(settingsSigningMethod, t)
 		assert.Nil(t, err)
 		base64PrivateKeyString := base64.StdEncoding.EncodeToString(privateKeyFile)
 		t.Logf("private key base64 encoded:\n%v", base64PrivateKeyString)
@@ -835,7 +836,7 @@ func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map
 
 		tcSign.SetInput("PrivateKey", base64PrivateKeyString)
 	case "HS256", "HS384", "HS512":
-		secretFile, err := ReadSecret(settingsSigningMethod, t)
+		secretFile, err := readSecret(settingsSigningMethod, t)
 		assert.Nil(t, err)
 
 		tcSign.SetInput("Secret", string(secretFile))
@@ -888,17 +889,18 @@ func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map
 	assert.Nil(t, err)
 	assert.Equal(t, len(payload), len(outputPayload))
 	for _, field := range payloadFieldNames {
-		if field["Type"].(string) == "Number" {
+		switch field["Type"].(string) {
+		case "Number":
 			numExpected, _ := ParseNumber(payload[field["Name"].(string)])
 			numActual, _ := ParseNumber(outputPayload[field["Name"].(string)])
 			assert.Equal(t, numExpected, numActual)
-		} else if field["Type"].(string) == "Array" {
+		case "Array":
 			pl, _ := coerce.ToArray(payload[field["Name"].(string)])
 			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
-		} else if field["Type"].(string) == "Object" {
+		case "Object":
 			pl, _ := coerce.ToObject(payload[field["Name"].(string)])
 			assert.Equal(t, pl, outputPayload[field["Name"].(string)])
-		} else {
+		default:
 			assert.Equal(t, payload[field["Name"].(string)], outputPayload[field["Name"].(string)])
 		}
 	}
@@ -908,5 +910,5 @@ func SignAndDecodeOnlyTest(testSigningMethod string, additionalHeaderNames []map
 
 func TestJWTSignAndDecode_RS256_WithObject(t *testing.T) {
 
-	SignAndDecodeOnlyTest("RS256", CreateEmptyHeaderNames(), CreateEmptyHeaders(), CreatePayloadFieldNamesWithObject(), CreatePayloadWithObject(), t)
+	SignAndDecodeOnlyTest("RS256", createEmptyHeaderNames(), createEmptyHeaders(), createPayloadFieldNamesWithObject(), createPayloadWithObject(), t)
 }

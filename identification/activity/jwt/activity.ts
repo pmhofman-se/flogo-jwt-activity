@@ -17,90 +17,102 @@ import {
     WiContributionUtils
 } from "wi-studio/app/contrib/wi-contrib";
 
+interface DefaultValues {
+    [key: string]: any;
+}
+
+interface ExampleInstance {
+    [key: string]: any;
+}
+
 @WiContrib({})
 @Injectable()
 export class JWTActivityContribution extends WiServiceHandlerContribution {
+
+    // Constants for field names
+    private readonly FIELD_NAMES = {
+        ADDITIONAL_HEADERS: 'AdditionalHeaders',
+        ADDITIONAL_HEADER_NAMES: 'AdditionalHeaderNames',
+        PAYLOAD: 'Payload',
+        PAYLOAD_FIELD_NAMES: 'PayloadFieldNames',
+        SECRET: 'Secret',
+        OUTPUT_HEADERS: 'OutputHeaders',
+        OUTPUT_HEADER_NAMES: 'OutputHeaderNames',
+        OUTPUT_PAYLOAD: 'OutputPayload',
+        OUTPUT_PAYLOAD_FIELD_NAMES: 'OutputPayloadFieldNames',
+        SIGNING_METHOD: 'SigningMethod',
+        MODE: 'Mode',
+        PRIVATE_KEY: 'PrivateKey',
+        PUBLIC_KEY: 'PublicKey',
+        VERIFY_JWT_TOKEN: 'VerifyJWTToken',
+        DECODE_JWT_TOKEN: 'DecodeJWTToken'
+    } as const;
+
+    private readonly SIGNING_METHODS_WITH_SECRET = ["HS256", "HS384", "HS512"];
+
+    private readonly MODES = {
+        SIGN: 'Sign',
+        VERIFY: 'Verify',
+        DECODE_ONLY: 'DecodeOnly'
+    }
+
     constructor(@Inject(Injector) injector, private http: Http) {
         super(injector, http);
     }
 
+    private getDefaultValueForType(type: string): any {
+        const defaults: DefaultValues = {
+            String: "abc",
+            Number: 0.1,
+            Boolean: false,
+            Object: {},
+            Array: []
+        };
+        return defaults[type] ?? null;
+    }
+
+
+    private generateDefaultValues(data: any): ExampleInstance {
+        const defaults: ExampleInstance = {};
+        for (const item of data) {
+            defaults[item.Name] = this.getDefaultValueForType(item.Type);
+        }
+        return defaults;
+    }
+
     value = (fieldName: string, context: IActivityContribution): Observable<any> | any => {
-        if (fieldName === "AdditionalHeaders") {
-            let additionalHeaderNames: IFieldDefinition = context.getField("AdditionalHeaderNames");
+        if (fieldName === this.FIELD_NAMES.ADDITIONAL_HEADERS) {
+            const additionalHeaderNames: IFieldDefinition = context.getField(this.FIELD_NAMES.ADDITIONAL_HEADER_NAMES);
             if (additionalHeaderNames.value) {
-                // Read message attrbutes and construct JSON schema on the fly for the activity input
-                var jsonSchema = {};
-                // Convert string value into JSON object
-                let data = JSON.parse(additionalHeaderNames.value);
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].Type === "String") {
-                        jsonSchema[data[i].Name] = "abc";
-                    } else if (data[i].Type === "Number") {
-                        jsonSchema[data[i].Name] = 0.1;
-                    }
-                }
-                return JSON.stringify(jsonSchema);
+                const data = JSON.parse(additionalHeaderNames.value);
+                const defaults = this.generateDefaultValues(data)
+                return JSON.stringify(defaults);
             }
             return "{}";
-        } else if (fieldName === "Payload") {
-            let payloadFieldNames: IFieldDefinition = context.getField("PayloadFieldNames");
+        } else if (fieldName === this.FIELD_NAMES.PAYLOAD) {
+            const payloadFieldNames: IFieldDefinition = context.getField(this.FIELD_NAMES.PAYLOAD_FIELD_NAMES);
             if (payloadFieldNames.value) {
-                // Read message attrbutes and construct JSON schema on the fly for the activity input
-                var jsonSchema = {};
-                // Convert string value into JSON object
-                let data = JSON.parse(payloadFieldNames.value);
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].Type === "String") {
-                        jsonSchema[data[i].Name] = "abc";
-                    } else if (data[i].Type === "Number") {
-                        jsonSchema[data[i].Name] = 0.0;
-                    } else if (data[i].Type === "Object") {
-                        jsonSchema[data[i].Name] = {};
-                    } else if (data[i].Type === "Array") {
-                        jsonSchema[data[i].Name] = [];
-                    }
-                }
-                return JSON.stringify(jsonSchema);
+                const data = JSON.parse(payloadFieldNames.value);
+                const defaults = this.generateDefaultValues(data)
+                return JSON.stringify(defaults);
             }
             return "{}";
-        } else if (fieldName === "Secret") {
+        } else if (fieldName === this.FIELD_NAMES.SECRET) {
             return ""
-        } else if (fieldName === "OutputHeaders") {
-            let outputHeaderNames: IFieldDefinition = context.getField("OutputHeaderNames");
+        } else if (fieldName === this.FIELD_NAMES.OUTPUT_HEADERS) {
+            const outputHeaderNames: IFieldDefinition = context.getField(this.FIELD_NAMES.OUTPUT_HEADER_NAMES);
             if (outputHeaderNames.value) {
-                // Read message attrbutes and construct JSON schema on the fly for the activity input
-                var jsonSchema = {};
-                // Convert string value into JSON object
-                let data = JSON.parse(outputHeaderNames.value);
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].Type === "String") {
-                        jsonSchema[data[i].Name] = "abc";
-                    } else if (data[i].Type === "Number") {
-                        jsonSchema[data[i].Name] = 0.1;
-                    }
-                }
-                return JSON.stringify(jsonSchema);
+                const data = JSON.parse(outputHeaderNames.value);
+                const defaults = this.generateDefaultValues(data)
+                return JSON.stringify(defaults);
             }
             return "{}";
-        } else if (fieldName === "OutputPayload") {
-            let outputPayloadFieldNames: IFieldDefinition = context.getField("OutputPayloadFieldNames");
+        } else if (fieldName === this.FIELD_NAMES.OUTPUT_PAYLOAD) {
+            const outputPayloadFieldNames: IFieldDefinition = context.getField(this.FIELD_NAMES.OUTPUT_PAYLOAD_FIELD_NAMES);
             if (outputPayloadFieldNames.value) {
-                // Read message attrbutes and construct JSON schema on the fly for the activity input
-                var jsonSchema = {};
-                // Convert string value into JSON object
-                let data = JSON.parse(outputPayloadFieldNames.value);
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].Type === "String") {
-                        jsonSchema[data[i].Name] = "abc";
-                    } else if (data[i].Type === "Number") {
-                        jsonSchema[data[i].Name] = 0.0;
-                    } else if (data[i].Type === "Object") {
-                        jsonSchema[data[i].Name] = {};
-                    } else if (data[i].Type === "Array") {
-                        jsonSchema[data[i].Name] = [];
-                    }
-                }
-                return JSON.stringify(jsonSchema);
+                const data = JSON.parse(outputPayloadFieldNames.value);
+                const defaults = this.generateDefaultValues(data)
+                return JSON.stringify(defaults);
             }
             return "{}";
         }
@@ -109,67 +121,56 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
     }
 
     validate = (fieldName: string, context: IActivityContribution): Observable<IValidationResult> | IValidationResult => {
-        if (fieldName === "SigningMethod") {
+        if (fieldName === this.FIELD_NAMES.SIGNING_METHOD) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "Sign" || mode.value == "Verify")) {
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if (mode.value && (mode.value == this.MODES.SIGN || mode.value == this.MODES.VERIFY)) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
             }
             return vresult;
         }
-        if (fieldName === "Secret") {
+        if (fieldName === this.FIELD_NAMES.SECRET) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let signingMethod: IFieldDefinition = context.getField("SigningMethod")
-            let mode: IFieldDefinition = context.getField("Mode")
-            if ((mode.value && (mode.value == "Sign" || mode.value == "Verify")) &&
-                (signingMethod.value && (signingMethod.value == "HS256" || signingMethod.value == "HS384" || signingMethod.value == "HS512"))) {
+            let signingMethod: IFieldDefinition = context.getField(this.FIELD_NAMES.SIGNING_METHOD)
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if ((mode.value && (mode.value == this.MODES.SIGN || mode.value == this.MODES.VERIFY)) &&
+                (signingMethod.value && this.SIGNING_METHODS_WITH_SECRET.includes(signingMethod.value))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
             }
             return vresult;
         }
-        if (fieldName === "PrivateKey") {
+        if (fieldName === this.FIELD_NAMES.PRIVATE_KEY) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let signingMethod: IFieldDefinition = context.getField("SigningMethod")
-            let mode: IFieldDefinition = context.getField("Mode")
-            if ((mode.value && (mode.value == "Sign")) &&
-                (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
+            let signingMethod: IFieldDefinition = context.getField(this.FIELD_NAMES.SIGNING_METHOD)
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if ((mode.value && (mode.value == this.MODES.SIGN)) &&
+                (signingMethod.value && !this.SIGNING_METHODS_WITH_SECRET.includes(signingMethod.value))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
             }
             return vresult;
         }
-        if (fieldName === "PublicKey") {
+        if (fieldName === this.FIELD_NAMES.PUBLIC_KEY) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let signingMethod: IFieldDefinition = context.getField("SigningMethod")
-            let mode: IFieldDefinition = context.getField("Mode")
-            if ((mode.value && (mode.value == "Verify")) &&
-                (signingMethod.value && (signingMethod.value != "HS256" && signingMethod.value != "HS384" && signingMethod.value != "HS512"))) {
+            let signingMethod: IFieldDefinition = context.getField(this.FIELD_NAMES.SIGNING_METHOD)
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if ((mode.value && (mode.value == this.MODES.VERIFY)) &&
+                (signingMethod.value && !this.SIGNING_METHODS_WITH_SECRET.includes(signingMethod.value))) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
             }
             return vresult;
         }
-        if (fieldName === "VerifyJWTToken") {
+        if (fieldName === this.FIELD_NAMES.VERIFY_JWT_TOKEN) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "Verify")) {
-                vresult.setVisible(true);
-            } else {
-                vresult.setVisible(false);
-            }
-            return vresult;
-
-        }
-        if (fieldName === "DecodeJWTToken") {
-            let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "DecodeOnly")) {
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if (mode.value && (mode.value == this.MODES.VERIFY)) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
@@ -177,10 +178,10 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             return vresult;
 
         }
-        if ((fieldName === "AdditionalHeaders") || (fieldName === "AdditionalHeaderNames") || (fieldName === "Payload") || (fieldName === "PayloadFieldNames")) {
+        if (fieldName === this.FIELD_NAMES.DECODE_JWT_TOKEN) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "Sign")) {
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if (mode.value && (mode.value == this.MODES.DECODE_ONLY)) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
@@ -188,10 +189,27 @@ export class JWTActivityContribution extends WiServiceHandlerContribution {
             return vresult;
 
         }
-        if ((fieldName === "OutputHeaders") || (fieldName === "OutputHeaderNames") || (fieldName === "OutputPayload") || (fieldName === "OutputPayloadFieldNames")) {
+        if ((fieldName === this.FIELD_NAMES.ADDITIONAL_HEADERS) || 
+            (fieldName === this.FIELD_NAMES.ADDITIONAL_HEADER_NAMES) || 
+            (fieldName === this.FIELD_NAMES.PAYLOAD) || 
+            (fieldName === this.FIELD_NAMES.PAYLOAD_FIELD_NAMES)) {
             let vresult: IValidationResult = ValidationResult.newValidationResult();
-            let mode: IFieldDefinition = context.getField("Mode")
-            if (mode.value && (mode.value == "Verify" || mode.value == "DecodeOnly")) {
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if (mode.value && (mode.value == this.MODES.SIGN)) {
+                vresult.setVisible(true);
+            } else {
+                vresult.setVisible(false);
+            }
+            return vresult;
+
+        }
+        if ((fieldName === this.FIELD_NAMES.OUTPUT_HEADERS) || 
+            (fieldName === this.FIELD_NAMES.OUTPUT_HEADER_NAMES) || 
+            (fieldName === this.FIELD_NAMES.PAYLOAD) || 
+            (fieldName === this.FIELD_NAMES.PAYLOAD_FIELD_NAMES)) {
+            let vresult: IValidationResult = ValidationResult.newValidationResult();
+            let mode: IFieldDefinition = context.getField(this.FIELD_NAMES.MODE)
+            if (mode.value && (mode.value == this.MODES.VERIFY || mode.value == this.MODES.DECODE_ONLY)) {
                 vresult.setVisible(true);
             } else {
                 vresult.setVisible(false);
